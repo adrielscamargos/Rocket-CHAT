@@ -1,0 +1,142 @@
+instalaçao em Vm com centos 
+
+
+instalando no centos programas para gerencia a vm
+
+yum -y install vim htop wget curl make gcc g++ gcc-c++ libgcc
+
+Instalando o Snapd
+
+sudo yum/dnf install snapd
+
+sudo systemctl enable snapd.socket --now
+
+sudo ln -s /var/lib/snapd/snap /snap
+
+reboot na VM
+
+sudo snap install rocketchat-server
+
+testar serviços
+
+snap services rocketchat-server
+
+Como estarei abordando a instalação para ambiente de testes, estarei desativando o SELinux e o FirewallD do CentOS 7:
+
+Desativando o SELinux:
+
+ sed -i "s/^SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/config
+
+sudo yum install epel-release curl GraphicsMagick gcc-c++
+
+yum -y install epel-release nano && yum -y update
+
+cat << EOF | sudo tee -a /etc/yum.repos.d/mongodb-org-4.0.repo
+[mongodb-org-4.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/4.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
+EOF
+
+
+Verificar se tem dois processos rodando 
+
+ps -eaf | grep mongod
+
+
+
+sudo yum install -y nodejs npm
+sudo npm install -g inherits n sudo n 8.11.3
+
+nano /etc/yum.repos.d/mongodb.repo
+
+dentro do arquivo 
+
+[mongodb-org-4.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/4.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
+
+
+yum -y install mongodb-org nodejs
+
+yum install -y nodejs curl GraphicsMagick npm mongodb-org-server mongodb-org gcc-c++
+
+npm install -g inherits n
+
+n 4.8.4
+
+instalando rocket chat
+
+cd /opt
+
+curl -L https://download.rocket.chat/stable -o rocket.chat.tgz
+
+tar zxvf rocket.chat.tgz
+
+cd /tmp/bundle/programs/server && npm install
+
+mv /tmp/bundle /opt/Rocket.Chat
+
+Configurando o Serviço do Rocket.Chat no SystemD:
+Adicione o usuário rocketchat e ajuste as permissões no diretório /opt/Rocket.Chat:
+useradd -M rocketchat && sudo usermod -L rocketchat
+chown -R rocketchat:rocketchat /opt/Rocket.Chat
+
+Em seguida, vamos criar o arquivo responsável por gerenciar o serviço do Rocket.Chat junto ao SystemD:
+
+Shell
+cat << EOF |sudo tee -a /lib/systemd/system/rocketchat.service
+[Unit]
+Description=The Rocket.Chat server
+After=network.target remote-fs.target nss-lookup.target nginx.target mongod.target
+[Service]
+ExecStart=/usr/local/bin/node /opt/Rocket.Chat/main.js
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=rocketchat
+User=rocketchat
+Environment=MONGO_URL=mongodb://localhost:27017/rocketchat?replicaSet=rs01 MONGO_OPLOG_URL=mongodb://localhost:27017/local?replicaSet=rs01 ROOT_URL=http://localhost:3000/ PORT=3000
+[Install]
+WantedBy=multi-user.target
+EOF
+sed -i "s/^#  engine:/  engine: mmapv1/"  /etc/mongod.conf
+
+sed -i "s/^#replication:/replication:\n  replSetName: rs01/" /etc/mongod.conf
+
+systemctl enable mongod
+
+npm install
+sudo npm install -g http-server
+cd ../..
+
+You can set PORT, ROOT_URL and MONGO_URL:
+
+export PORT=3000
+export ROOT_URL=http://your-host-name.com-as-accessed-from-internet:3000/
+export MONGO_URL=mongodb://localhost:27017/rocketchat
+Replace 3000, with the port of your choosing.
+
+If you choose to use port 80 you will need to run Rocket.Chat as root.
+
+If you don’t have DNS configured use your IP in place of the hostname. You can change it later in the admin menu.
+
+Mongo
+First lets enable Mongodb to start with the host using:
+
+chkconfig mongod on
+Now we need to start mongo:
+
+systemctl start mongod
+or for CentOs 6.X
+
+/etc/init.d/mongod start
+
+
+iniciando junto com o SO
+
+systemctl enable rocketchat && sudo systemctl start rocketchat

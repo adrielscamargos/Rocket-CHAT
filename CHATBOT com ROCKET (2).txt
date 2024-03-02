@@ -1,0 +1,211 @@
+Projeto: Chatbot com URA usando Rocket.chat e ligerosmart Venom-bot
+
+Ubuntu server 16.04.7 LTS Xenial
+
+* o whatsap trata com 9 ddds menores que 30 DDs maiores que 30 ele trata sem o nove.
+
+
+Installation
+
+Installing a snap on Ubuntu is as easy as
+
+
+yum snapd install rocketchat-server
+
+
+Then browse to http://localhost:3000 and setup Rocket.Chat.
+
+
+Snaps are secure. Rocket.Chat and all of its dependencies are isolated from the rest of your system. 
+Snaps also auto update when we release a new version. So no need more hassle updating.
+On Ubuntu 16.04LTS, install snapd first:
+
+
+sudo apt-get install snapd
+
+
+snap services rocketchat-server
+
+(verifica instalação)
+
+pega ip ou dominio da vm e acessa na porta :3000
+
+cirar usuarios e grupos que falam entre si
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Como Instalar venom - bot  no Ubuntu Server com Node.JS (roda javascript)
+O Ubuntu 16.04 contém uma versão do Node.js em seus repositórios padrão que pode ser utilizada para fornecer facilmente uma experiência consistente entre múltiplos servidores. No momento da redação, a versão nos repositórios é a v4.2.6. Esta não será a última versão, mas deve ser bastante estável, e deve ser suficiente para uma experimentação rápida com a linguagem.
+
+Para obter esta versão, temos apenas que utilizar o gerenciador de pacotes apt. Devemos atualizar nosso índice de pacotes primeiro e então, instalar através dos repositórios:
+Não rodar como root. Running as user work.
+
+To avoid having to log out of our normal user and log back in as the root account, we can set up what is known as “superuser” or root privileges for our normal account. This will allow our normal user to run commands with administrative privileges by putting the word sudo before each command.
+To add these privileges to our new user, we need to add the new user to the “sudo” group. By default, on Ubuntu 16.04, users who belong to the “sudo” group are allowed to use the sudo command.
+As root, run this command to add your new user to the sudo group (substitute the highlighted word with your new user):
+
+usermod -aG sudo sammy
+$
+
+Liberando SSH no Ubuntu =server
+
+Abrir o arquivo de configuração do SSH para realizar as alterações:
+
+vim /etc/ssh/sshd_config
+Procurar pela linha abaixo para realizar a alteração:
+
+PermitRootLogin prohibit-password
+E alterara a linha PermitRootLogin prohibit-password  para a linha abaixo:
+
+PermitRootLogin yes
+Também existe a possibilidade de rodar um comando que executa a mesma operação acima, segue abaixo:
+sudo apt-get install openssh-server
+
+sudo service ssh restart
+
+sudo apt-get update
+
+Após instaar a porta 22 
+Abra também no firewall a porta 3000 do rocket chat
+
+sudo ufw allow 3000
+
+Verificar as prtas abertas com 
+
+sudo ufw status verbose
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+(instalando o Nodejs na mais nova versão)
+
+curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+
+sudo apt-get install -y nodejs
+
+Se o pacote no repositório satisfaz suas necessidades, isto é tudo que você precisa fazer para ter o Node.js configurado. Em muitos casos, você vai querer também instalar o npm, que é o gerenciador de pacotes do Node.js. Você pode fazer isto digitando:
+
+sudo apt-get install npm
+ou
+apt install npm
+
+Devido a um conflito com outro pacote, o executável dos repositórios do Ubuntu é chamado nodejs em vez de node. Tenha isso em mente quando estiver executando software.
+
+nodejs -v
+node --version
+mostra a versão instalada
+
+Conhecendo o Venom Bot
+O Venom Bot é uma biblioteca que consegue integrar o seu número do WhatsApp abrindo por debaixo dos panos o WhatsApp Web. Uma vez que é realizada a autenticação via QR Code diretamente do terminal, você conseguirá manipular via código JavaScript toda e qualquer interação disponível no WhatsApp Web, mais especificamente pelo Node.js.
+Vamos iniciar um novo projeto criando o arquivo index.js e instalando o Venom Bot:
+
+cd /opt
+mkdir node-whatsapp-bot
+sudo chmod -R 755 node-whatsapp-bot e arquivos internos
+cd node-whatsapp-bot
+touch index.js
+npm install venom-bot --unsafe-perm --verbose -g sails       (esse é o Comando correto ) 
+
+(em caso de falhas nas permissões)
+
+sudo npm install -g puppeteer --unsafe-perm=true
+
+npm cache clean
+npm install
+
+Após esta etapa OK
+
+Colocamos esse conteúdo no index.js
+
+const venom = require('venom-bot');
+
+venom
+  .create()
+  .then((client) => start(client));
+
+function start(client) {
+  client.onMessage((message) => {
+    if (message.body === 'Oi' || message.body === 'Olá') {
+      client
+        .sendText(message.from, 'Olá! Tudo bem com você?')
+        .then((result) => {
+          console.log('Result: ', result); //retorna um objeto de successo
+        })
+        .catch((erro) => {
+          console.error('Erro ao enviar mensagem: ', erro); //return um objeto de erro
+        });
+    }
+  });
+}
+
+
+rodamos
+
+ node index.js
+
+em caso de erros
+
+npm i --save venom-bot
+
+ao rodar node index.js o crohminu nao inicia entao.
+npm init -y &&  \
+    npm i puppeteer \
+referências: 
+
+( em caso de rodar o node index.js e o crohme nao abrir, ai desinstala com npm remove chromium e roda o comando abaixo)
+
+sudo apt-get install chromium-browser
+
+Rodamos node index.js e lemos o Qrcode do celular ou numero fixo no Whatsapbussines
+
+Após ler o Qr code com número do Whatsap
+
+Quem enviar mensagens para ele e entrara nas regra do script é será respondido automaticamente podendo ser encaminhado para outros atendentes via rocket chat
+
+Integrando com WEBHOOKS  + NGROK (url de teste )
+
+
+tar -xvzf ngrok-stable...
+
+faça login com eamil no site da ngrok instale descompactando e rodando comando com com thoken que se pega no porta deles "YOUR autotohken".
+
+
+ sudo tar xvzf ~/Downloads/ngrok-stable-linux-amd64.tgz -C /usr/local/bin
+
+./ngrok authtoken 24UV9NtTIiKxdUchsOmIOlTC5zV_7RZ4WYcnX4VfWF24P4e5z
+acesse  /usr/local/bin   e rode
+
+ngrok http  3000
+
+
+pega a url  'https://b82d-189-6-13-31.ngrok.io'
+eo token e colcoa em webhoks do rockechat
+
+export ROOT_URL=https://b82d-189-6-13-31.ngrok.io
+
+
+sud ufw alow 4040
+
+para acessar o 
+
+CHAT-BOT CRIADO COM SUCESSO sua AI pessoal.
+
+referencias:
+
+https://andrewrosario.medium.com/automatize-seu-whatsapp-com-node-js-b099532fed48
+
+https://releases.ubuntu.com/xenial/
+
+https://docs.rocket.chat/quick-start/installing-and-updating/snaps
+
+https://docs.ligerosmart.org/kb/chatbot-integrando-o-botpress-com-o-rocket-chat/
+
+https://botpress.com/download?utm_source=github&utm_medium=organic&utm_campaign=botpress_repo&utm_term=readme
+
+https://orkestral.github.io/venom/
+
+Valor da mensaldade 197,00 2 atendentes gerando protocolo  e tudo ate R$ 500,00 mês
+
+https://cosmobots.io/whatsapp-business-api/#plans?utm_campaign=Blog&utm_source=blogpost&utm_medium=referral&utm_term=novo%20modelo%20de%20cobran%C3%A7a%20da%20API%20do%20WhatsApp
+
+https://dashboard.ngrok.com/get-started/setup

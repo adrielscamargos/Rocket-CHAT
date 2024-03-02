@@ -1,0 +1,371 @@
+Projeto: Chatbot com URA usando Rocket.chat e ligerosmart Venom-bot
+
+CentOS Linux release 7.9.2009 (Core)
+
+* o whatsap trata com 9 ddds menores que 30 DDs maiores que 30 ele trata sem o nove.
+
+
+Enable snapd
+Snap is available for CentOS 7.6+, and Red Hat Enterprise Linux 7.6+, from the Extra Packages for Enterprise Linux (EPEL) repository. The EPEL repository can be added to your system with the following command:
+
+sudo yum install epel-release
+
+Snap can now be installed as follows:
+
+sudo yum install snapd
+
+Once installed, the systemd unit that manages the main snap communication socket needs to be enabled:
+
+sudo systemctl enable --now snapd.socket
+
+To enable classic snap support, enter the following to create a symbolic link between /var/lib/snapd/snap and /snap:
+
+sudo ln -s /var/lib/snapd/snap /snap
+
+Either log out and back in again, or restart your system, to ensure snap’s paths are updated correctly.
+
+Install Rocket.Chat Server
+
+To install Rocket.Chat Server, simply use the following command:
+
+sudo snap install rocketchat-server
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Then browse to http://localhost:3000 and setup Rocket.Chat.
+
+
+(verifica instalação)
+
+sudo ufw allow 3000
+
+Verificar as prtas abertas com 
+
+sudo ufw status verbose
+
+ou iptables -nL | grep 3000
+
+iptables -A INPUT -p tcp --dport 3000 -j ACCEPT
+
+pega ip ou dominio da vm e acessa na porta :3000
+
+configura setup wizard recebe o e-mail acessa criamos
+grupos e usuarios que falam entre si
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Alteração de porta no Rocket 
+
+vi /lib/systemd/system/rocketchat.service
+
+[Unit]
+Description=The Rocket.Chat server
+After=network.target remote-fs.target nss-lookup.target nginx.target mongod.target
+[Service]
+ExecStart=/usr/local/bin/node /opt/Rocket.Chat/main.js
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=rocketchat
+User=rocketchat
+Environment=MONGO_URL=mongodb://localhost:27017/rocketchat?replicaSet=rs01 MONGO_OPLOG_URL=mongodb://localhost:27017/local?replicaSet=rs01 ROOT_URL=http://localhost:3001/ PORT=3001
+[Install]
+WantedBy=multi-user.target
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+export ROOT_URL=http://191.252.182.127:3000/
+
+export MONGO_URL=mongodb://localhost:27017/rocketchat
+
+export PORT=3000
+export ADMIN_USERNAME=admin
+
+export ADMIN_PASS=A!2756a@2018
+export ADMIN_EMAIL=adrielscamargos@gmail.com
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Como Instalar venom - bot  no Ubuntu Server com Node.JS (roda javascript)
+O Ubuntu 16.04 contém uma versão do Node.js em seus repositórios padrão que pode ser utilizada para fornecer facilmente uma experiência consistente entre múltiplos servidores. No momento da redação, a versão nos repositórios é a v4.2.6. Esta não será a última versão, mas deve ser bastante estável, e deve ser suficiente para uma experimentação rápida com a linguagem.
+
+Para obter esta versão, temos apenas que utilizar o gerenciador de pacotes apt. Devemos atualizar nosso índice de pacotes primeiro e então, instalar através dos repositórios:
+Não rodar como root. Running as user work.
+
+To avoid having to log out of our normal user and log back in as the root account, we can set up what is known as “superuser” or root privileges for our normal account. This will allow our normal user to run commands with administrative privileges by putting the word sudo before each command.
+To add these privileges to our new user, we need to add the new user to the “sudo” group. By default, on Ubuntu 16.04, users who belong to the “sudo” group are allowed to use the sudo command.
+As root, run this command to add your new user to the sudo group (substitute the highlighted word with your new user):
+
+usermod -aG sudo sammy
+$
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Liberando SSH no Ubuntu =server
+
+Abrir o arquivo de configuração do SSH para realizar as alterações:
+
+vim /etc/ssh/sshd_config
+Procurar pela linha abaixo para realizar a alteração:
+
+PermitRootLogin prohibit-password
+E alterara a linha PermitRootLogin prohibit-password  para a linha abaixo:
+
+PermitRootLogin yes
+Também existe a possibilidade de rodar um comando que executa a mesma operação acima, segue abaixo:
+sudo apt-get install openssh-server
+
+sudo service ssh restart
+sudo apt-get update
+Após instaar a porta 22 
+Abra também no firewall a porta 3000 do rocket chat
+sudo ufw allow 22
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+(instalando o Nodejs na mais nova versão)
+
+yum install -y curl && curl -sL https://rpm.nodesource.com/setup_12.x | bash -
+sudo yum install -y nodejs
+
+npm install -g inherits n && n 12.18.4
+
+nodejs -v
+node --version
+mostra a versão instalada
+
+npm -v
+
+Conhecendo o Venom Bot
+O Venom Bot é uma biblioteca que consegue integrar o seu número do WhatsApp abrindo por debaixo dos panos o WhatsApp Web. Uma vez que é realizada a autenticação via QR Code diretamente do terminal, você conseguirá manipular via código JavaScript toda e qualquer interação disponível no WhatsApp Web, mais especificamente pelo Node.js.
+Vamos iniciar um novo projeto criando o arquivo index.js e instalando o Venom Bot:
+
+cd /opt
+mkdir node-whatsapp-bot
+sudo chmod -R 755 node-whatsapp-bot e arquivos internos
+cd node-whatsapp-bot
+touch index.js
+sudo chmod -R 755 index.js
+
+npm install venom-bot --unsafe-perm --verbose -g sails       (esse é o Comando correto ) 
+
+(em caso de falhas nas permissões)
+
+sudo npm install -g puppeteer --unsafe-perm=true
+
+npm cache clean
+npm install
+
+Após esta etapa OK
+
+Colocamos esse conteúdo no index.js
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const venom = require('venom-bot');
+
+venom
+  .create()
+  .then((client) => start(client));
+
+function start(client) {
+  client.onMessage((message) => {
+    if (message.body === 'Oi' || message.body === 'Olá') {
+      client
+        .sendText(message.from, 'Olá! Tudo bem com você?')
+        .then((result) => {
+          console.log('Result: ', result); //retorna um objeto de successo
+        })
+        .catch((erro) => {
+          console.error('Erro ao enviar mensagem: ', erro); //return um objeto de erro
+        });
+    }
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rodamos
+de dentro do diretório /opt/node-whatsapp-bot/
+ node index.js
+
+em caso de erros
+
+npm i --save venom-bot
+
+ao rodar node index.js o crohminu nao inicia entao.
+npm init -y &&  \
+    npm i puppeteer \
+referências: 
+
+( em caso de rodar o node index.js e o crohme nao abrir, ai desinstala com npm remove chromium e roda o comando abaixo)
+
+yum install pango.x86_64 libXcomposite.x86_64 libXcursor.x86_64 libXdamage.x86_64 libXext.x86_64 libXi.x86_64 libXtst.x86_64 cups-libs.x86_64 libXScrnSaver.x86_64 libXrandr.x86_64 GConf2.x86_64 alsa-lib.x86_64 atk.x86_64 gtk3.x86_64 ipa-gothic-fonts xorg-x11-fonts-100dpi xorg-x11-fonts-75dpi xorg-x11-utils xorg-x11-fonts-cyrillic xorg-x11-fonts-Type1 xorg-x11-fonts-misc
+
+sudo yum install chromium-browser
+
+Rodamos node index.js e lemos o Qrcode do celular ou numero fixo no Whatsapbussines
+
+Após ler o Qr code com número do Whatsap
+
+Quem enviar mensagens para ele e entrara nas regra do script é será respondido automaticamente podendo ser encaminhado para outros atendentes via rocket chat
+
+Integrando com WEBHOOKS  + NGROK (url de teste )
+
+tar -xvzf ngrok-stable...
+
+faça login com eamil no site da ngrok instale descompactando e rodando comando com com thoken que se pega no porta deles "YOUR autotohken".
+
+ sudo tar xvzf ~/Downloads/ngrok-stable-linux-amd64.tgz -C /usr/local/bin
+
+./ngrok authtoken 24UV9NtTIiKxdUchsOmIOlTC5zV_7RZ4WYcnX4VfWF24P4e5z
+acesse  /usr/local/bin   e rode
+
+ngrok http  3000
+
+pega a url  'https://b82d-189-6-13-31.ngrok.io'
+eo token e colcoa em webhoks do rockechat
+
+export ROOT_URL=https://b82d-189-6-13-31.ngrok.io
+
+sud ufw alow 4040
+
+para acessar o 
+
+CHAT-BOT CRIADO COM SUCESSO sua AI pessoal.
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+LIGEROSMART no rocketchat market + botpress na VM  
+
+acesso do botpress 
+
+http://191.252.182.127:3001/dashboard#
+
+cd /
+
+npm install -g botpress
+botpress -V
+botpress init nome-do-seu-chatbot
+
+botpress start
+
+cd /ura-bot     (rode o comando dentro da pasta criada para o bot na raiz)
+
+npm install
+
+npm start
+
+e ou 
+bp start
+
+vi botfile.js
+
+chatbot/content/
+
+altere a porta de 3000 para 3001
+
+Caso a instalação falhe 
+
+BOTPRESS_PORT=3001 yarn start
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Installing a module from the command-line is as simple as typingnpm install @botpress/channel-messenger
+
+local da instalaç~~ao  /usr/lib/node_modules/botpress
+
+
+curl https://get.ligerosmart.com | sh
+
+
+# Primeiro acesso
+
+O ambiente será configurado e funcionará na porta 8008
+
+Na primeira execução o sistema é configurado para você. Aguarde até que todas as configurações sejam aplicadas.
+A tela de login será carregada automaticamente ao final da configuração.
+
+* Endereço: http://localhost/otrs/index.pl
+* Usuário: root@localhost
+* Senha: ligero
+
+Informações de acesso do Grafana:
+* Endereço: http://localhost/grafana
+* Usuário: admin
+* Senha: ligero
+
+Informações de acesso do Elasticsearch:
+* Endereço: http://localhost/elasticsearch
+* Usuário: admin
+* Senha: (inclua o hash de senha no docker-compose.yml)
+
+Caso queira acessar remotamente, troque o endereço localhost pelo IP do seu servidor
+
+# Documentação
+
+Veja em https://docs.ligerosmart.org
+-----------------------------------------------------------------------------------------------------------
+Environment information:
+   Project name: ligerosmart-stack
+         Branch: main
+      Directory: /root/ligerosmart-stack
+
+
+como estamos numa Vm nao docker
+
+sudo systemctl stop containerd.service 
+sudo systemctl stop docker.socket 
+
+cd  no caminho da nstalação onde fica 
+
+/root/ligerosmart-stack
+vi docker-compose.yml
+altera de porta 80 para 8008
+sudo systemctl start docker.socket 
+
+Ports
+- 8008:80
+      - 8008:443
+traefik.port=3001
+
+ou apenas docker-compose ps
+
+iptables -A INPUT -p tcp --dport 3000 -j ACCEPT
+
+/usr/src/fusionpbx-install.sh/centos/resources/nginx    alterar porta de 80 para 7007
+ sudo systemctl restart nginx
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+referencias:
+
+https://snapcraft.io/install/rocketchat-server/centos    (principal)
+
+https://andrewrosario.medium.com/automatize-seu-whatsapp-com-node-js-b099532fed48
+
+https://www.liquidweb.com/kb/install-rocket-chat-centos-7/
+
+https://docs.rocket.chat/quick-start/installing-and-updating/snaps
+
+https://docs.ligerosmart.org/kb/chatbot-integrando-o-botpress-com-o-rocket-chat/
+
+https://botpress.com/download?utm_source=github&utm_medium=organic&utm_campaign=botpress_repo&utm_term=readme
+
+
+
+
+*caso a porta esteja aber ano iptables mas nao exista aplicação esctando na porta ela aparentemente da refused ou desconectada
+
+n
+https://github.com/botpress/botpress/issues/759
+
+https://orkestral.github.io/venom/
+https://imasters.com.br/desenvolvimento/botpress-chatbot-tao-simples-quanto-instalar-o-wordpress
+
+https://www.devopsart.com/2019/09/create-your-first-chatbot-by-botpress.html
+
+Valor da mensaldade 197,00 2 atendentes gerando protocolo  e tudo ate R$ 500,00 mês
+
+https://cosmobots.io/whatsapp-business-api/#plans?utm_campaign=Blog&utm_source=blogpost&utm_medium=referral&utm_term=novo%20modelo%20de%20cobran%C3%A7a%20da%20API%20do%20WhatsApp
+
+https://dashboard.ngrok.com/get-started/setup
